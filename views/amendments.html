@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Policy Amendment</title>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <style>
+        #loading{
+            background: rgba(255,255,255,0.8);
+            display: none;
+            position: fixed;
+            z-index: 999;
+            height: 100%;
+            width: 100%;
+        }
+        #loading img{
+            display: block;
+            margin: 0 auto;
+            height: 148px;
+            width: 250px;
+        }
+    </style>
+    <!--JQuery minified cdn-->
+    <script   src="https://code.jquery.com/jquery-3.2.1.min.js"   integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="   crossorigin="anonymous"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="container">
+    <div id="loading">
+        <img src="images/loading.gif" alt="loading">
+    </div>
+    <div class="panel panel-danger">
+        <div class="panel-body">
+            <form action="sendAmendedRequest" method="POST">
+                <div class="form-group" id="id">
+                    <label class="col-sm-6 control-lable">Enter Your NIC Number</label>
+                    <div class="col-sm-8">
+                        <input class="form-control" name="nic" id="nic" placeholder="" required>
+                    </div>
+                    <div class="col-xs-6">
+                        <input class="form-control btn btn-success" name="" id="next" type="button" value="NEXT" onclick="gonext();">
+                    </div>
+                </div>
+                <div class="form-group" id="policy_no" hidden="true">
+                    <lable class="col-sm-6 control-lable">Enter Your Policy Number</lable>
+                    <div class="col-sm-8">
+                        <input class="form-control" name="policy" id="policy" placeholder="" required>
+                    </div>
+                    <div class="col-xs-6">
+                        <input class="form-control btn btn-primary" name="" id="back" type="button" value="BACK" onclick="goback();">
+                    </div>
+                    <div class="col-xs-6">
+                        <input class="form-control btn btn-success" name="" id="" type="button" onclick="validate();" value="VALIDATE">
+                    </div>
+                </div>
+                <div class="form-group" id="mobile_no" hidden="true">
+                    <label class="col-sm-6 control-lable">Enter Your Mobile Number</label>
+                    <div class="col-sm-8">
+                        <input class="form-control" name="mobile" id="mobile" placeholder=" " required>
+                    </div>
+                    <div class="col-xs-6">
+                        <input class="form-control btn btn-primary" id="back2" type="button" value="BACK" onclick="goback2();">
+                    </div>
+                    <div class="col-xs-6">
+                        <input class="form-control btn btn-success" id="next2" type="button" value="NEXT" onclick="gonext2();">
+                    </div>
+                </div>
+                <div class="form-group" id="reason" hidden="true">
+                    <label class="col-sm-6 control-lable">Enter Your Amendment</label>
+                    <div class="col-sm-8">
+                        <input class="form-control" name="comment" id="comment" placeholder=" " required>
+                    </div>
+                    <div class="col-xs-6">
+                        <input class="form-control btn btn-primary" id="back3" type="button" value="BACK" onclick="goback3();">
+                    </div>
+                    <div class="col-xs-6">
+                        <input class="form-control btn btn-success" name="submit" id="submit" type="submit" value="SUBMIT">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+    function gonext() {
+        $("#id").hide(300);
+        $("#policy_no").show(400);
+    }
+    function goback() {
+        $("#policy_no").hide(300);
+        $("#id").show(400);
+    }
+    function goback2() {
+        $("#mobile_no").hide(400);
+        $("#id").hide();
+        $("#policy_no").show(400);
+    }
+    function gonext2() {
+        var mobile = document.getElementById("mobile").value;
+        if (mobile == ""){
+            alert("Please enter mobile number");
+            $("#id").hide();
+            $("#mobile_no").show(300);
+        }
+        else{
+            $("#id").hide();
+            $("#mobile_no").hide(300);
+            $("#reason").show(400);
+        }
+    }
+    function goback3() {
+        $("#reason").hide(300);
+        $("#id").hide();
+        $("#mobile_no").show(400);
+    }
+    function validate() {
+        event.preventDefault();
+        var nic = document.getElementById("nic").value;
+        var policy = document.getElementById("policy").value;
+
+        if (nic == ""){
+            alert("Please enter NIC Number");
+            goback();
+        }
+        else if(policy == ""){
+            alert("Please enter Policy Number");
+        }
+        else{
+            $("#loading").show(400);
+            $.ajax({
+                type: 'post',
+                url: 'validate',
+                data: {
+                    nic: $("#nic").val(),
+                    policy: $("#policy").val(),
+                },
+                success: function (data) {
+                    if (data == 1){
+                        $("#loading").hide(400);
+                        $("#policy_no").hide(300);
+                        $("#mobile_no").show(400);
+                    }
+                    else{
+                        $("#loading").hide(400);
+                        alert("Policy Number and NIC Number not match with database");
+                        goback();
+                    }
+                },
+                error: function (request, status, error) {
+                    $("#loading").hide(400);
+                    alert(error);
+                }
+            });
+        }
+    }
+</script>
